@@ -148,3 +148,49 @@ extension Sign: KeyPairGenerator {
         }
     }
 }
+
+extension Sign {
+    /**
+     Converts an Ed25519 secret key to an X25519 secret key.
+
+     - Parameter secretKey: The Ed25519 secret key.
+
+     - Returns: The X25519 secret key.
+     */
+    public func toCurve25519PrivateKey(secretKey: SecretKey) -> SecretKey? {
+        guard secretKey.count == SecretKeyBytes else {
+            return nil
+        }
+
+        var curve25519PrivateKey = Array<UInt8>(count: secretKey.count)
+
+        guard .SUCCESS == crypto_sign_ed25519_sk_to_curve25519 (
+            &curve25519PrivateKey,
+            secretKey
+        ).exitCode else { return nil }
+
+        return curve25519PrivateKey
+    }
+
+    /**
+     Converts an Ed25519 public key to an X25519 public key.
+
+     - Parameter publicKey: The Ed25519 public key.
+
+     - Returns: The X25519 public key.
+     */
+    public func toCurve25519PublicKey(publicKey: PublicKey) -> PublicKey? {
+        guard publicKey.count == PublicKeyBytes else {
+            return nil
+        }
+
+        var curve25519PublicKey = Array<UInt8>(count: publicKey.count)
+
+        guard .SUCCESS == crypto_sign_ed25519_pk_to_curve25519 (
+            &curve25519PublicKey,
+            publicKey
+        ).exitCode else { return nil }
+
+        return curve25519PublicKey
+    }
+}
